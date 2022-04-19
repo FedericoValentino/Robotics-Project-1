@@ -207,5 +207,5 @@ include_directories(
 
 
 
-add_executable(subscriber src/sub.cpp)
-target_link_libraries(subscriber ${catkin_LIBRARIES})
+add_executable(computing src/computing.cpp)
+target_link_libraries(computing ${catkin_LIBRARIES})
