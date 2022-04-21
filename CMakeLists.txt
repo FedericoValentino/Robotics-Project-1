@@ -211,6 +211,9 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 add_executable(computing src/computing.cpp)
 target_link_libraries(computing ${catkin_LIBRARIES})
 
+add_executable(wheelSpeed src/wheelSpeed.cpp)
+target_link_libraries(wheelSpeed ${catkin_LIBRARIES})
+
 add_executable(odometry src/OdometryPublisher.cpp)
 add_dependencies(odometry ${catkin_EXPORTED_TARGETS})
 target_link_libraries(odometry ${catkin_LIBRARIES})

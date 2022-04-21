@@ -1,5 +1,6 @@
 <launch>
   <node pkg="project1" type="computing" name="velocity_comp" />
+  <node pkg="project1" type="wheelSpeed" name="vector_print"/>
   <node pkg="rosbag" type = "play" name="rosbag" args="/home/feder/Desktop/Programmazione/robotics/src/project1/src/bag1.bag" />
   <node pkg="project1" type="odometry" name="odometry_publisher" />
 </launch>
