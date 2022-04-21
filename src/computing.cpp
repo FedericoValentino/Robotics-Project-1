@@ -4,8 +4,8 @@
 #include "VelocityPublisher.h"
 
 #define WHEELRADIUS 0.07
-#define ENCODER_RES 42
-#define RATIO 5
+#define ENCODER_RES 42.0
+#define RATIO 5.0
 ros::Publisher pub;
 
 
@@ -30,7 +30,7 @@ void VelocityPublisher::computeVelocities()
   double fr = ((msg2Data.position[1] - msg1Data.position[1])/(timeDiff(msg2Data.header.stamp, msg1Data.header.stamp))) * (1/ENCODER_RES) * (1/RATIO) * 2*3.14;
   double rl = ((msg2Data.position[2] - msg1Data.position[2])/(timeDiff(msg2Data.header.stamp, msg1Data.header.stamp))) * (1/ENCODER_RES) * (1/RATIO) * 2*3.14;
   double rr = ((msg2Data.position[3] - msg1Data.position[3])/(timeDiff(msg2Data.header.stamp, msg1Data.header.stamp))) * (1/ENCODER_RES) * (1/RATIO) * 2*3.14;
-  ROS_INFO("Front Left speed is %f", ((msg2Data.position[0] - msg1Data.position[0])/(timeDiff(msg2Data.header.stamp, msg1Data.header.stamp))));
+  //ROS_INFO("Front Left speed is %f", ((msg2Data.position[0] - msg1Data.position[0])/(timeDiff(msg2Data.header.stamp, msg1Data.header.stamp))) * (1/ENCODER_RES));
 
   velocity.x = (fl + fr + rl + rr) * (WHEELRADIUS / 4);
   velocity.y = (-fl + fr + rl - rr) * (WHEELRADIUS / 4);
