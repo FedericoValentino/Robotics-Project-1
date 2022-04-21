@@ -103,8 +103,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES project1
+  INCLUDE_DIRS include
+  LIBRARIES odometry_class
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -205,10 +205,18 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-
+include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(computing src/computing.cpp)
 target_link_libraries(computing ${catkin_LIBRARIES})
 
 add_executable(wheelSpeed src/wheelSpeed.cpp)
 target_link_libraries(wheelSpeed ${catkin_LIBRARIES})
+
+add_executable(odometry src/OdometryPublisher.cpp)
+add_dependencies(odometry ${catkin_EXPORTED_TARGETS})
+target_link_libraries(odometry ${catkin_LIBRARIES})
+
+add_library(odometry_class src/OdometryPublisher.cpp)
+add_dependencies(odometry_class ${catkin_EXPORTED_TARGETS})
+target_link_libraries(odometry_class ${catkin_LIBRARIES})
