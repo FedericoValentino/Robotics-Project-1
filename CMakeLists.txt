@@ -209,3 +209,6 @@ include_directories(
 
 add_executable(computing src/computing.cpp)
 target_link_libraries(computing ${catkin_LIBRARIES})
+
+add_executable(wheelSpeed src/wheelSpeed.cpp)
+target_link_libraries(wheelSpeed ${catkin_LIBRARIES})
