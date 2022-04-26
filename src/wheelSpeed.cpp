@@ -10,9 +10,9 @@
 ros::Publisher pub;
 
 void publishSpeed(const geometry_msgs::TwistStamped msg){
-  /*ROS_INFO("data subscribed (%f %f %f), (%f %f %f)",
+  ROS_INFO("data subscribed (%f %f %f), (%f %f %f)",
   msg.twist.linear.x,msg.twist.linear.y,msg.twist.linear.z,
-  msg.twist.angular.x,msg.twist.angular.y,msg.twist.angular.z);*/
+  msg.twist.angular.x,msg.twist.angular.y,msg.twist.angular.z);
   project1::WheelSpeed message;
   message.Header=msg.header;
   double vx=msg.twist.linear.x;
@@ -34,7 +34,7 @@ void publishSpeed(const geometry_msgs::TwistStamped msg){
 }
 
 int main(int argc, char**argv){
-  ros :: init(argc,argv,"vector_print");
+  ros :: init(argc,argv,"wheelSpeed_publisher");
   ros :: NodeHandle node;
   pub=node.advertise<project1::WheelSpeed>("wheels_rpm",1000);
   ros :: Subscriber sub=node.subscribe("/cmd_vel",1000,publishSpeed);

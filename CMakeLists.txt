@@ -201,26 +201,11 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-include_directories(include ${catkin_INCLUDE_DIRS})
-
-add_executable(computing src/computing.cpp)
-target_link_libraries(computing ${catkin_LIBRARIES})
-
-add_executable(wheelSpeed src/wheelSpeed.cpp)
-target_link_libraries(wheelSpeed ${catkin_LIBRARIES})
-
-add_executable(odometry src/OdometryPublisher.cpp)
-add_dependencies(odometry ${catkin_EXPORTED_TARGETS})
-target_link_libraries(odometry ${catkin_LIBRARIES})
-
-add_library(odometry_class src/OdometryPublisher.cpp)
-add_dependencies(odometry_class ${catkin_EXPORTED_TARGETS})
-target_link_libraries(odometry_class ${catkin_LIBRARIES})
-
 find_package(catkin REQUIRED COMPONENTS
 roscpp
 rospy
 std_msgs
+tf2_ros
 message_generation
 )
 
@@ -228,7 +213,6 @@ add_message_files(
   FILES
   WheelSpeed.msg
 )
-
 
 generate_messages(
   DEPENDENCIES
@@ -238,11 +222,22 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES odometry_class
-#  CATKIN_DEPENDS roscpp rospy std_msgs
-#  DEPENDS system_lib
-   CATKIN_DEPENDS message_runtime
+  CATKIN_DEPENDS message_runtime
 )
 
-#include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS})
 
+add_executable(computing src/computing.cpp)
+target_link_libraries(computing ${catkin_LIBRARIES})
+
+add_executable(wheelSpeed src/wheelSpeed.cpp)
 add_dependencies(wheelSpeed ${catkin_EXPORTED_TARGETS})
+target_link_libraries(wheelSpeed ${catkin_LIBRARIES})
+
+add_executable(odometry src/OdometryPublisher.cpp)
+add_dependencies(odometry ${catkin_EXPORTED_TARGETS})
+target_link_libraries(odometry ${catkin_LIBRARIES})
+
+add_library(odometry_class src/OdometryPublisher.cpp)
+add_dependencies(odometry_class ${catkin_EXPORTED_TARGETS})
+target_link_libraries(odometry_class ${catkin_LIBRARIES})
