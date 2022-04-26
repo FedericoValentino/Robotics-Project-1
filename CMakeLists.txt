@@ -103,12 +103,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES odometry_class
-#  CATKIN_DEPENDS roscpp rospy std_msgs
-#  DEPENDS system_lib
-)
+
 
 ###########
 ## Build ##
@@ -221,3 +216,33 @@ target_link_libraries(odometry ${catkin_LIBRARIES})
 add_library(odometry_class src/OdometryPublisher.cpp)
 add_dependencies(odometry_class ${catkin_EXPORTED_TARGETS})
 target_link_libraries(odometry_class ${catkin_LIBRARIES})
+
+find_package(catkin REQUIRED COMPONENTS
+roscpp
+rospy
+std_msgs
+message_generation
+)
+
+add_message_files(
+  FILES
+  WheelSpeed.msg
+)
+
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
+
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES odometry_class
+#  CATKIN_DEPENDS roscpp rospy std_msgs
+#  DEPENDS system_lib
+   CATKIN_DEPENDS message_runtime
+)
+
+#include_directories(include ${catkin_INCLUDE_DIRS})
+
+add_dependencies(wheelSpeed ${catkin_EXPORTED_TARGETS})
