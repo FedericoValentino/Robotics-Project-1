@@ -7,7 +7,7 @@
 #define WHEELRADIUS 0.07
 #define ENCODER_RES 42.0
 #define RATIO 5.0
-#define CONV_FACTOR 3.14/30
+#define CONV_FACTOR 9.549297
 
 
 VelocityPublisher::VelocityPublisher()
@@ -37,7 +37,7 @@ void VelocityPublisher::computeVelocities()
   message.rpm_rl = rl * CONV_FACTOR;
   message.rpm_rr = rr * CONV_FACTOR;
 
-  //pub2.publish(message);
+  pub2.publish(message);
 
   velocity.x = (fl + fr + rl + rr) * (WHEELRADIUS / 4);
   velocity.y = (-fl + fr + rl - rr) * (WHEELRADIUS / 4);
