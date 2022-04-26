@@ -2,18 +2,19 @@
 #include "sensor_msgs/JointState.h"
 #include "geometry_msgs/TwistStamped.h"
 #include "VelocityPublisher.h"
+#include "project1/WheelSpeed.h"
 
 #define WHEELRADIUS 0.07
 #define ENCODER_RES 42.0
 #define RATIO 5.0
-ros::Publisher pub;
+#define CONV_FACTOR 3.14/30
 
 
 VelocityPublisher::VelocityPublisher()
 {
   sub = this->n.subscribe("/wheel_states", 1000, &VelocityPublisher::wheelsCallback, this);
   pub = this->n.advertise<geometry_msgs::TwistStamped>("cmd_vel", 1000);
-
+  pub2 = this->n.advertise<project1::WheelSpeed>("speeds", 1000);
   velocity.x = 0;
   velocity.y = 0;
   velocity.z = 0;
@@ -25,12 +26,18 @@ VelocityPublisher::VelocityPublisher()
 
 void VelocityPublisher::computeVelocities()
 {
-
+  project1::WheelSpeed message;
   double fl = ((msg2Data.position[0] - msg1Data.position[0])/(timeDiff(msg2Data.header.stamp, msg1Data.header.stamp))) * (1/ENCODER_RES) * (1/RATIO) * 2*3.14;
   double fr = ((msg2Data.position[1] - msg1Data.position[1])/(timeDiff(msg2Data.header.stamp, msg1Data.header.stamp))) * (1/ENCODER_RES) * (1/RATIO) * 2*3.14;
   double rl = ((msg2Data.position[2] - msg1Data.position[2])/(timeDiff(msg2Data.header.stamp, msg1Data.header.stamp))) * (1/ENCODER_RES) * (1/RATIO) * 2*3.14;
   double rr = ((msg2Data.position[3] - msg1Data.position[3])/(timeDiff(msg2Data.header.stamp, msg1Data.header.stamp))) * (1/ENCODER_RES) * (1/RATIO) * 2*3.14;
   //ROS_INFO("Front Left speed is %f", ((msg2Data.position[0] - msg1Data.position[0])/(timeDiff(msg2Data.header.stamp, msg1Data.header.stamp))) * (1/ENCODER_RES));
+  message.rpm_fl = fl * CONV_FACTOR;
+  message.rpm_fr = fr * CONV_FACTOR;
+  message.rpm_rl = rl * CONV_FACTOR;
+  message.rpm_rr = rr * CONV_FACTOR;
+
+  //pub2.publish(message);
 
   velocity.x = (fl + fr + rl + rr) * (WHEELRADIUS / 4);
   velocity.y = (-fl + fr + rl - rr) * (WHEELRADIUS / 4);
