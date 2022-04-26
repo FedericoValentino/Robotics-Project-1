@@ -10,9 +10,9 @@
 ros::Publisher pub;
 
 void publishSpeed(const geometry_msgs::TwistStamped msg){
-  ROS_INFO("data subscribed (%f %f %f), (%f %f %f)",
+  /*ROS_INFO("data subscribed (%f %f %f), (%f %f %f)",
   msg.twist.linear.x,msg.twist.linear.y,msg.twist.linear.z,
-  msg.twist.angular.x,msg.twist.angular.y,msg.twist.angular.z);
+  msg.twist.angular.x,msg.twist.angular.y,msg.twist.angular.z);*/
   project1::WheelSpeed message;
   message.Header=msg.header;
   double vx=msg.twist.linear.x;
