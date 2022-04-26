@@ -5,7 +5,7 @@
 #define R 0.07
 #define L 0.2
 #define W 0.169
-#define CONV_FACTOR 9.9549297
+#define CONV_FACTOR 9.549297
 
 ros::Publisher pub;
 
