@@ -1,5 +1,6 @@
 #include "OdometryPublisher.h"
 #include "math.h"
+#include "project1/ResetOdometry.h"
 
 #include "ros/ros.h"
 #include "std_msgs/Header.h"
@@ -14,13 +15,12 @@
 OdometryPublisher::OdometryPublisher() {
     sub = this->n.subscribe("cmd_vel", 1000, &OdometryPublisher::velocityCallback, this);
     pub = this->n.advertise<nav_msgs::Odometry>("odom", 1000);
-    integrationMethod = IntegrationMethod::EULER;;
-    //For these i need the inizializer
-    x_k = 0.0;
-    y_k = 0.0;
-    theta_k = 0.0;
-    t_k = ros::Time::now();
-    t_k_new = ros::Time::now();
+    integrationMethod = IntegrationMethod::EULER;
+
+    service = n.advertiseService("reset", &OdometryPublisher::resetOdometryCallback, this);
+
+    f = boost::bind(&OdometryPublisher::integrationMethodReconfigureCallback, this, _1, _2);
+    dynServer.setCallback(f);
 }
 
 void OdometryPublisher::velocityCallback(const geometry_msgs::TwistStamped::ConstPtr& msg) {
@@ -38,12 +38,35 @@ void OdometryPublisher::velocityCallback(const geometry_msgs::TwistStamped::Cons
         case IntegrationMethod::RUNGE_KUTTA :
             rungeKuttaOdometry();
             break;
-
-        default:
-            break;
     }
 
     publishOdometry(msg->header);
+    broadcastTFOdometry(msg->header);
+}
+
+bool OdometryPublisher::resetOdometryCallback(project1::ResetOdometry::Request &req, project1::ResetOdometry::Response &res) {
+    res.old_x = x_k;
+    res.old_y = y_k;
+    res.old_theta = theta_k;
+    res.old_time_seconds = t_k.toSec();
+    
+    x_k = req.new_x;
+    y_k = req.new_y;
+    theta_k = req.new_theta;
+    t_k_new = ros::Time(req.new_time_seconds);
+
+    return true;
+}
+
+void OdometryPublisher::integrationMethodReconfigureCallback(project1::integrationParameterConfig &config, uint32_t level) {
+    switch (config.integrationMethod) {
+    case 0:
+        integrationMethod = IntegrationMethod::EULER;
+        break;
+    case 1:
+        integrationMethod = IntegrationMethod::RUNGE_KUTTA;
+        break;
+    } 
 }
 
 void OdometryPublisher::eulerOdometry() {
@@ -100,8 +123,8 @@ void OdometryPublisher::broadcastTFOdometry(const std_msgs::Header header) {
 
     transformStamped.header.seq = header.seq;
     transformStamped.header.stamp = header.stamp;
-    transformStamped.header.frame_id = "world"; //don't know what to put here
-    transformStamped.child_frame_id = "base_link"; //don't know what to put here
+    transformStamped.header.frame_id = "odom";
+    transformStamped.child_frame_id = "base_link";
 
     transformStamped.transform.translation.x = x_k;
     transformStamped.transform.translation.y = y_k;
@@ -120,7 +143,7 @@ void OdometryPublisher::broadcastTFOdometry(const std_msgs::Header header) {
 int main(int argc, char **argv) {
     ros::init(argc, argv, "callbacks_sub");
   
-    OdometryPublisher odometryPublisher; // constructor is called
+    OdometryPublisher odometryPublisher;
 
     ros::spin();
 

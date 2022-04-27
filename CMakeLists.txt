@@ -12,6 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   tf2_ros
+  message_generation
+  dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
@@ -55,11 +57,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  ResetOdometry.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -89,10 +90,9 @@ find_package(catkin REQUIRED COMPONENTS
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+generate_dynamic_reconfigure_options(
+  cfg/integrationParameter.cfg
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -207,6 +207,7 @@ rospy
 std_msgs
 tf2_ros
 message_generation
+dynamic_reconfigure
 )
 
 add_message_files(
