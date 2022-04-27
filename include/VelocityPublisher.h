@@ -16,7 +16,7 @@ private:
   ros::NodeHandle n;
   ros::Subscriber sub;
   ros::Publisher pub;
-  ros::Publisher pub2;
+  ros::Publisher pubTest;
 
   sensor_msgs::JointState msg1Data;
   sensor_msgs::JointState msg2Data;

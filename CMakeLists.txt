@@ -201,15 +201,6 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-find_package(catkin REQUIRED COMPONENTS
-roscpp
-rospy
-std_msgs
-tf2_ros
-message_generation
-dynamic_reconfigure
-)
-
 add_message_files(
   FILES
   WheelSpeed.msg
