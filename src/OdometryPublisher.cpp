@@ -12,18 +12,23 @@
 #include "nav_msgs/Odometry.h"
 #include "tf2/LinearMath/Quaternion.h"
 
+#define PI 3.14
+
 OdometryPublisher::OdometryPublisher() {
     sub = this->n.subscribe("cmd_vel", 1000, &OdometryPublisher::velocityCallback, this);
     pub = this->n.advertise<nav_msgs::Odometry>("odom", 1000);
-    integrationMethod = IntegrationMethod::EULER;
+    integrationMethod = IntegrationMethod::RUNGE_KUTTA;
 
     service = n.advertiseService("reset", &OdometryPublisher::resetOdometryCallback, this);
 
     f = boost::bind(&OdometryPublisher::integrationMethodReconfigureCallback, this, _1, _2);
     dynServer.setCallback(f);
+
+    isInitialized = false;
 }
 
 void OdometryPublisher::velocityCallback(const geometry_msgs::TwistStamped::ConstPtr& msg) {
+    if(!isInitialized) return;
     v_x_k = msg->twist.linear.x;
     v_y_k = msg->twist.linear.y;
     omega_k = msg->twist.angular.z;
@@ -40,8 +45,8 @@ void OdometryPublisher::velocityCallback(const geometry_msgs::TwistStamped::Cons
             break;
     }
 
-    publishOdometry(msg->header);
     broadcastTFOdometry(msg->header);
+    publishOdometry(msg->header);
 }
 
 bool OdometryPublisher::resetOdometryCallback(project1::ResetOdometry::Request &req, project1::ResetOdometry::Response &res) {
@@ -54,6 +59,9 @@ bool OdometryPublisher::resetOdometryCallback(project1::ResetOdometry::Request &
     y_k = req.new_y;
     theta_k = req.new_theta;
     t_k_new = ros::Time(req.new_time_seconds);
+
+    isInitialized = true;
+    //ROS_INFO("Reset at pose (%f,%f,%f) and time %f sec", x_k, y_k, theta_k, req.new_time_seconds);
 
     return true;
 }
@@ -72,10 +80,13 @@ void OdometryPublisher::integrationMethodReconfigureCallback(project1::integrati
 void OdometryPublisher::eulerOdometry() {
     double Ts = (t_k_new - t_k).toSec();
 
-    //For euler integration, it's ok to use v_x and v_y (it don't use different angle from the initial velocity orientation)
-    x_k = x_k + v_x_k * Ts;
-    y_k = y_k + v_y_k * Ts;
-    theta_k = theta_k + omega_k * Ts;
+    //v_x_k and v_y_k are in the robot frame, so the velocity orientation has to be adjusted by theta_k to match global frame
+    double v_x = v_x_k * cos(theta_k) - v_y_k * sin(theta_k);
+    double v_y = v_y_k * sin(theta_k) + v_y_k * cos(theta_k);
+
+    x_k += v_x * Ts;
+    y_k += v_y * Ts;
+    theta_k += omega_k * Ts;
 }
 
 void OdometryPublisher::rungeKuttaOdometry() {
@@ -84,8 +95,11 @@ void OdometryPublisher::rungeKuttaOdometry() {
     //velocity module
     double velocity = sqrt(pow(v_x_k, 2.0) + pow(v_y_k, 2.0));
 
+    double v_x = v_x_k * cos(theta_k) - v_y_k * sin(theta_k);
+    double v_y = v_y_k * sin(theta_k) + v_y_k * cos(theta_k);
+
     //velocity orientation(at time k)
-    double vel_angle = atan(v_y_k / v_x_k);
+    double vel_angle = atan(v_y / v_x);
 
     //velocity mean orientation from time k to time k+1
     double vel_mean_angle = vel_angle + ((omega_k * Ts) / 2.0);
@@ -99,9 +113,10 @@ void OdometryPublisher::rungeKuttaOdometry() {
 void OdometryPublisher::publishOdometry(const std_msgs::Header header) {
     nav_msgs::Odometry msg;
 
-    msg.header.frame_id = header.frame_id;
+    msg.header.frame_id = "odom";
     msg.header.seq = header.seq;
     msg.header.stamp = header.stamp;
+    msg.child_frame_id = "base_link";
 
     msg.pose.pose.position.x = x_k;
     msg.pose.pose.position.y = y_k;
@@ -141,7 +156,7 @@ void OdometryPublisher::broadcastTFOdometry(const std_msgs::Header header) {
 }
 
 int main(int argc, char **argv) {
-    ros::init(argc, argv, "callbacks_sub");
+    ros::init(argc, argv, "odometry_publisher");
   
     OdometryPublisher odometryPublisher;
 

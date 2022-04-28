@@ -46,6 +46,7 @@ private:
   double v_y_k;
   double omega_k;
   IntegrationMethod integrationMethod;
+  bool isInitialized;
 };
 
 #endif

@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   message_generation
   dynamic_reconfigure
+  tf2_geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -233,3 +234,7 @@ target_link_libraries(odometry ${catkin_LIBRARIES})
 add_library(odometry_class src/OdometryPublisher.cpp)
 add_dependencies(odometry_class ${catkin_EXPORTED_TARGETS})
 target_link_libraries(odometry_class ${catkin_LIBRARIES})
+
+add_executable(pose_resetter src/PoseResetter.cpp)
+add_dependencies(pose_resetter ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pose_resetter ${catkin_LIBRARIES})

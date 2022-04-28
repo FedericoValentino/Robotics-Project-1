@@ -1,6 +1,9 @@
 <launch>
   <node pkg="project1" type="computing" name="velocity_comp" />
   <node pkg="project1" type="wheelSpeed" name="wheelSpeed_publisher"/>
-  <node pkg="rosbag" type = "play" name="rosbag" args="/home/sinnanzi/robotics/src/Robotics-Project-1/src/bag2.bag" />
+  <node pkg="rosbag" type = "play" name="rosbag" args="/home/carlosgara/robotics/src/project1/src/bag1.bag" />
   <node pkg="project1" type="odometry" name="odometry_publisher" />
+  <node pkg="project1" type="pose_resetter" name="reset" />
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="world_odom" args="0 0 0 0 0 0 1 world odom " />
 </launch>
