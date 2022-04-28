@@ -12,8 +12,6 @@
 #include "nav_msgs/Odometry.h"
 #include "tf2/LinearMath/Quaternion.h"
 
-#define PI 3.14
-
 OdometryPublisher::OdometryPublisher() {
     sub = this->n.subscribe("cmd_vel", 1000, &OdometryPublisher::velocityCallback, this);
     pub = this->n.advertise<nav_msgs::Odometry>("odom", 1000);
@@ -82,7 +80,7 @@ void OdometryPublisher::eulerOdometry() {
 
     //v_x_k and v_y_k are in the robot frame, so the velocity orientation has to be adjusted by theta_k to match global frame
     double v_x = v_x_k * cos(theta_k) - v_y_k * sin(theta_k);
-    double v_y = v_y_k * sin(theta_k) + v_y_k * cos(theta_k);
+    double v_y = v_x_k * sin(theta_k) + v_y_k * cos(theta_k);
 
     x_k += v_x * Ts;
     y_k += v_y * Ts;
@@ -96,7 +94,7 @@ void OdometryPublisher::rungeKuttaOdometry() {
     double velocity = sqrt(pow(v_x_k, 2.0) + pow(v_y_k, 2.0));
 
     double v_x = v_x_k * cos(theta_k) - v_y_k * sin(theta_k);
-    double v_y = v_y_k * sin(theta_k) + v_y_k * cos(theta_k);
+    double v_y = v_x_k * sin(theta_k) + v_y_k * cos(theta_k);
 
     //velocity orientation(at time k)
     double vel_angle = atan(v_y / v_x);
