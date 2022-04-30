@@ -4,8 +4,8 @@
 #include "VelocityPublisher.h"
 #include "project1/WheelSpeed.h"
 
-#define WHEELRADIUS 0.07
-#define ENCODER_RES 42.0
+#define WHEELRADIUS 0.064
+#define ENCODER_RES 39.89
 #define RATIO 5.0
 #define L 0.2
 #define W 0.169

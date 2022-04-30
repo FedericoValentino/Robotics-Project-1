@@ -2,7 +2,7 @@
 #include "geometry_msgs/TwistStamped.h"
 #include "project1/WheelSpeed.h"
 
-#define R 0.07
+#define R 0.064
 #define L 0.2
 #define W 0.169
 #define CONV_FACTOR 9.549297
