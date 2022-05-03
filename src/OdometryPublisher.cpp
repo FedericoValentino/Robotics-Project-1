@@ -52,7 +52,7 @@ bool OdometryPublisher::resetOdometryCallback(project1::ResetOdometry::Request &
     res.old_y = y_k;
     res.old_theta = theta_k;
     res.old_time_seconds = t_k.toSec();
-    
+
     x_k = req.new_x;
     y_k = req.new_y;
     theta_k = req.new_theta;
@@ -72,7 +72,7 @@ void OdometryPublisher::integrationMethodReconfigureCallback(project1::integrati
     case 1:
         integrationMethod = IntegrationMethod::RUNGE_KUTTA;
         break;
-    } 
+    }
 }
 
 void OdometryPublisher::eulerOdometry() {
@@ -155,7 +155,7 @@ void OdometryPublisher::broadcastTFOdometry(const std_msgs::Header header) {
 
 int main(int argc, char **argv) {
     ros::init(argc, argv, "odometry_publisher");
-  
+
     OdometryPublisher odometryPublisher;
 
     ros::spin();

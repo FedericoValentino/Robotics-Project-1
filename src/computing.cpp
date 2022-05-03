@@ -5,12 +5,15 @@
 #include "project1/WheelSpeed.h"
 
 #define WHEELRADIUS 0.064
-#define ENCODER_RES 39.89
+#define ENCODER_RES 39.8475
 #define RATIO 5.0
 #define L 0.2
 #define W 0.169
 #define PI 3.14
 #define CONV_FACTOR 9.549297
+
+//FILE* output = fopen("/home/feder/Desktop/Programmazione/robotics/src/project1/src/outputOriginal.txt", "w");
+//FILE* output2 = fopen("/home/feder/Desktop/Programmazione/robotics/src/project1/src/outputObtained.txt", "w");
 
 
 VelocityPublisher::VelocityPublisher()
@@ -33,7 +36,7 @@ void VelocityPublisher::computeVelocities()
   double fr = ((msg2Data.position[1] - msg1Data.position[1])/(timeDiff(msg2Data.header.stamp, msg1Data.header.stamp))) * (1/ENCODER_RES) * (1/RATIO) * 2*PI;
   double rl = ((msg2Data.position[2] - msg1Data.position[2])/(timeDiff(msg2Data.header.stamp, msg1Data.header.stamp))) * (1/ENCODER_RES) * (1/RATIO) * 2*PI;
   double rr = ((msg2Data.position[3] - msg1Data.position[3])/(timeDiff(msg2Data.header.stamp, msg1Data.header.stamp))) * (1/ENCODER_RES) * (1/RATIO) * 2*PI;
-  //ROS_INFO("Front Left speed is %f", ((msg2Data.position[0] - msg1Data.position[0])/(timeDiff(msg2Data.header.stamp, msg1Data.header.stamp))) * (1/ENCODER_RES));
+  //fprintf(output2, "%f\n%f\n%f\n%f\n", fl * RATIO/CONV_FACTOR, fr * RATIO/CONV_FACTOR, rl * RATIO/CONV_FACTOR, rr * RATIO/CONV_FACTOR);
 
   project1::WheelSpeed message;
   message.rpm_fl = fl * CONV_FACTOR;
@@ -79,6 +82,7 @@ void VelocityPublisher::wheelsCallback(const sensor_msgs::JointState::ConstPtr& 
 
   if(totalMessage >= 2)
   {
+    //fprintf(output, "%f\n%f\n%f\n%f\n", msg.get()->velocity[0]/60, msg.get()->velocity[1]/60, msg.get()->velocity[2]/60, msg.get()->velocity[3]/60);
     computeVelocities();
   }
 }

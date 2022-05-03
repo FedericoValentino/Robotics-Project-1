@@ -58,10 +58,7 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-add_service_files(
-  FILES
-  ResetOdometry.srv
-)
+
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -201,6 +198,11 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+add_service_files(
+  FILES
+  ResetOdometry.srv
+)
 
 add_message_files(
   FILES
