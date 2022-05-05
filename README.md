@@ -51,11 +51,85 @@ As you can see the class doesn't quite end there. For example the pubTest publis
 The totalMessage integer is just used to count up the number of messages received by the node.
 
 ### OdometryPublisher node
+This node is represented by a C++ class named `OdometryPublisher` that has the following interface.
+```
+enum class IntegrationMethod {
+    EULER, RUNGE_KUTTA
+};
+
+class OdometryPublisher {
+public:
+  OdometryPublisher(); 
+  void velocityCallback(const geometry_msgs::TwistStamped::ConstPtr& msg);
+  void eulerOdometry();
+  void rungeKuttaOdometry();
+  void publishOdometry(const std_msgs::Header header);
+  void broadcastTFOdometry(const std_msgs::Header header);
+  bool resetOdometryCallback(project1::ResetOdometry::Request &req, project1::ResetOdometry::Response &res);
+  void integrationMethodReconfigureCallback(project1::integrationParameterConfig &config, uint32_t level);
+
+private:
+  ros::NodeHandle n; 
+  ros::Subscriber sub;
+  ros::Publisher pub;
+  ros::ServiceServer service;
+  tf2_ros::TransformBroadcaster transformBroadcaster;
+  geometry_msgs::TransformStamped transformStamped;
+
+  dynamic_reconfigure::Server<project1::integrationParameterConfig> dynServer;
+  dynamic_reconfigure::Server<project1::integrationParameterConfig>::CallbackType f;
+
+  double x_k;
+  double y_k;
+  double theta_k;
+  ros::Time t_k;
+  ros::Time t_k_new;
+  double v_x_k;
+  double v_y_k;
+  double omega_k;
+  IntegrationMethod integrationMethod;
+  bool isInitialized;
+};
+```
+The class subscribe the **/cmd_vel** topic and uses its content to compute the odometry, that will be published in the **/odom** topic. Method `velocityCallback` is called everytime a message from **/cmd_vel** is subscribed; this method updates the current velocities of the robot in the robot frame and the current time. Depending on the value of the *integrationMethod* attribute, method `velocityCallback` calls `eulerOdometry` (if the *integrationMethod* is **EULER**) or `rungeKuttaOdometry` (if the *integrationMethod* is **RUNGE_KUTTA**); these two methods update robot's odometry. 
+
+To compute odometry, the linear velocities that are obtained from the **/cmd_vel** topic need to be transformed from the robot frame to the global frame:
+$v_x = v_x_k \cdot \cos(theta_k) - v_y_k \cdot \sin(theta_k) </br>
+$v_y = v_x_k \cdot \sin(theta_k) + v_y_k \cdot \cos(theta_k) </br>
+where *v_x* and *v_y* are in the global frame and *v_x_k* and *v_y_k* are in the robot frame.
+
+Method `eulerOdometry` uses Euler integration to compute odometry:</br>
+$x_k = x_k + v_x \cdot Ts </br>
+$y_k = y_k + v_y \cdot Ts </br>
+$theta_k = theta_k + omega \cdot Ts </br>
+where Ts is the interval between the last received message (*t_k*) and the new received message(*t_k_new*).
+
+Method `rungeKuttaOdometry` uses Runge-Kutta integration to compute odometry: </br>
+$x_k = x_k + v \cdot Ts \cdot \cos(theta_k + (omega * Ts / 2) </br>
+$y_k = y_k + v \cdot Ts \cdot \sin(theta_k + (omega * Ts / 2) </br>
+$theta_k = theta_k + omega \cdot Ts
+
+After computing odometry, `publishOdometry` and `broadcastTFOdometry` methods are called: the first one publish robot's odometry in the **/odom** topic; the second one broadcast TF from frame **odom** to frame **base_link**.
+
+Method `resetOdometryCallback` is the callback function of the ResetOdometry service that reset the robot pose to a given pose. Method `integrationMethodReconfigureCallback` is the server callback for the dynamic reconfigure of the *integrationMethod* attribute; by default, the nose initialize the *integrationMethod* attribute to compute odometry with Runge-Kutta integration
 
 ### Wheel_Speed node
 This node is concerned to test the correctness of the computed speed published by the computing node. It subscribes to the topic **/cmd_vel**, then it calls the *publishSpeed* callback function which computes starting from the robot's linear and angular speeds each of the single wheel speeds. Notice that every single value is corrected with a conversion factor (**CONV_FACTOR**) to pass from $\dfrac{rad}{s}$ to $rpm$. Then it publish the results into a custom message *WheelSpeed.msg*, on the topic **/wheels_rpm**.
 
 ## Services
+We implemented a service called `ResetOdometry` that resets the robot pose to any given pose. This service is described by the **ResetOdometry.srv** file: the Request of the service specify the new pose and the new time; the Response specify the old pose and the old time.
+To call the `ResetOdometry` service: </br>
+`rosservice call /reset param1 param2 param3`</br>
+where *param1* is the new *x*, *param2* is the new *y* and *param3* is the new *theta*.
+
+## Dynamic Reconfigure
+We used also dynamic reconfigure to reconfigure the integration method for computing the robot odometry. To call the dynamic reconfigure:</br>
+`rosrun rqt_reconfigure rqt_reconfigure`</br>
+the name of the node on which the parameter is recofigured is odometry_publisher; to set Euler as the integration method insert 0, to set Runge-Kutta insert 1.
+
+This can be done also with the command line as </br>
+`rosrun dynamic_reconfigure dynparam set /odometry_publisher integrationMethod param`</br>
+where *param* can be 0 or 1.
 
 ## Parameters Calibration
 We prefered to calibrate our r, l, w and N values manually rather than making our nodes to it automatically. For each parameter we have applied a different approach.
