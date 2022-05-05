@@ -127,6 +127,7 @@ void OdometryPublisher::publishOdometry(const std_msgs::Header header) {
     msg.pose.pose.orientation.z = q.getZ();
     msg.pose.pose.orientation.w = q.getW();
 
+
     ROS_INFO("Robot pose : (%f, %f, %f)", msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.orientation.z);
 
     pub.publish(msg);

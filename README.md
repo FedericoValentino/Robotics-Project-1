@@ -53,6 +53,7 @@ The totalMessage integer is just used to count up the number of messages receive
 ### OdometryPublisher node
 
 ### Wheel_Speed node
+This node is concerned to test the correctness of the computed speed published by the computing node. It subscribes to the topic **/cmd_vel**, then it calls the *publishSpeed* callback function which computes starting from the robot's linear and angular speeds each of the single wheel speeds. Notice that every single value is corrected with a conversion factor (**CONV_FACTOR**) to pass from $\dfrac{rad}{s}$ to $rpm$. Then it publish the results into a custom message *WheelSpeed.msg*, on the topic **/wheels_rpm**.
 
 ## Services
 
@@ -125,4 +126,4 @@ What we have done to get the perfect Encoder Resolution is run the Bag1.bag data
 
 ### Wheel radius R
 
-### Length(l) and Width(w)
+### Length (l) and Width (w)
