@@ -1,10 +1,11 @@
+
 # Robotics Project 1
 ## General Project Structure
 Our project is divided into 3 nodes, each of which, has a precise role.
 
  - **Velocity_Comp Node**: it subscribes to the wheel_states topic and publishes the robot linear and angular velocity in the cmd_vel topic;
  - **OdometryPublisher Node**: it subscribes to the previously published cmd_vel topic and publishes the robot odometry in the odom topic;
- - **Wheel_speed Node**: it subscribes to cmd_vel topic in order to recompute back the each of the robot wheel speed and publishes them over a custom message that is published on the wheels_rpm topic;
+ - **WheelSpeed Node**: it subscribes to cmd_vel topic in order to recompute back the each of the robot wheel speed and publishes them over a custom message that is published on the wheels_rpm topic;
 
 We also have included a reset service, for resetting the odometry at any given pose and a dynamic reconfigure, to change the integration method between Euler and Runge-Kutta.
 
@@ -52,8 +53,12 @@ The totalMessage integer is just used to count up the number of messages receive
 
 ### OdometryPublisher node
 
-### Wheel_Speed node
-This node is concerned to test the correctness of the computed speed published by the computing node. It subscribes to the topic **/cmd_vel**, then it calls the *publishSpeed* callback function which computes starting from the robot's linear and angular speeds each of the single wheel speeds. Notice that every single value is corrected with a conversion factor (**CONV_FACTOR**) to pass from $\dfrac{rad}{s}$ to $rpm$. Then it publish the results into a custom message *WheelSpeed.msg*, on the topic **/wheels_rpm**.
+### WheelSpeed node
+This node is concerned to test the correctness of the computed speed published by the **computing** node. It subscribes to the topic **/cmd_vel**, then it calls the *publishSpeed* callback function which computes starting from the robot's linear and angular speeds each of the single wheel speeds, by using the following formula:
+
+$\small \begin{bmatrix} v_{l1}\\ v_{r1}\\v_{r2}\\v_{l2} \end{bmatrix}$ = $\small \dfrac{1}{r}$$\small \begin{bmatrix}-l-w&&1&&-1\\l+w&&1&&1\\l+w&&1&&-1\\-l-w&&1&&1\end{bmatrix}$ $\small \begin{bmatrix} \omega \\ v_{x} \\ v_{y} \end{bmatrix}$
+
+Notice that the result is given in $\scriptsize \dfrac{rad}{s}$ , so every single value is corrected with a conversion factor ($\scriptsize \bold{CONV\_FACTOR}$) to transform them into $\small rpm$. The results are then published into a custom message *WheelSpeed.msg*, on the topic **/wheels_rpm**.
 
 ## Services
 
@@ -61,7 +66,7 @@ This node is concerned to test the correctness of the computed speed published b
 We prefered to calibrate our r, l, w and N values manually rather than making our nodes to it automatically. For each parameter we have applied a different approach.
 
 ### Encoder Resolution(N)
-What we have done to get the perfect Encoder Resolution is run the Bag1.bag data through a Perceptron. We first started by getting the data out of the bag by using our first node, Velocity_comp(you can see the code lines we used to do it in the node source code, commented out). One file contained the raw wheel speeds in $\dfrac{rad}{s}$, the other one contained our wheel speeds, not yet multiplied by $\dfrac{1}{EncoderResolution}$. What we fed the neuron were our speeds and what we got out of it after some training were our raw wheel speeds. The Perceptron guessed after many inputs the best Encoder Resolution to use, which was 39,8475. The code follows:
+What we have done to get the perfect Encoder Resolution is run the Bag1.bag data through a Perceptron. We first started by getting the data out of the bag by using our first node, Velocity_comp(you can see the code lines we used to do it in the node source code, commented out). One file contained the raw wheel speeds in $\scriptsize \dfrac{rad}{s}$, the other one contained our wheel speeds, not yet multiplied by $\scriptsize \dfrac{1}{EncoderResolution}$. What we fed the neuron were our speeds and what we got out of it after some training were our raw wheel speeds. The Perceptron guessed after many inputs the best Encoder Resolution to use, which was 39,8475. The code follows:
 
     #include <stdio.h>
     #include<iostream>
