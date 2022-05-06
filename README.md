@@ -60,7 +60,7 @@ enum class IntegrationMethod {
 
 class OdometryPublisher {
 public:
-  OdometryPublisher(); 
+  OdometryPublisher();
   void velocityCallback(const geometry_msgs::TwistStamped::ConstPtr& msg);
   void eulerOdometry();
   void rungeKuttaOdometry();
@@ -70,7 +70,7 @@ public:
   void integrationMethodReconfigureCallback(project1::integrationParameterConfig &config, uint32_t level);
 
 private:
-  ros::NodeHandle n; 
+  ros::NodeHandle n;
   ros::Subscriber sub;
   ros::Publisher pub;
   ros::ServiceServer service;
@@ -92,7 +92,7 @@ private:
   bool isInitialized;
 };
 ```
-The class subscribe the **/cmd_vel** topic and uses its content to compute the odometry, that will be published in the **/odom** topic. Method `velocityCallback` is called everytime a message from **/cmd_vel** is subscribed; this method updates the current velocities of the robot in the robot frame and the current time. Depending on the value of the *integrationMethod* attribute, method `velocityCallback` calls `eulerOdometry` (if the *integrationMethod* is **EULER**) or `rungeKuttaOdometry` (if the *integrationMethod* is **RUNGE_KUTTA**); these two methods update robot's odometry. 
+The class subscribe the **/cmd_vel** topic and uses its content to compute the odometry, that will be published in the **/odom** topic. Method `velocityCallback` is called everytime a message from **/cmd_vel** is subscribed; this method updates the current velocities of the robot in the robot frame and the current time. Depending on the value of the *integrationMethod* attribute, method `velocityCallback` calls `eulerOdometry` (if the *integrationMethod* is **EULER**) or `rungeKuttaOdometry` (if the *integrationMethod* is **RUNGE_KUTTA**); these two methods update robot's odometry.
 
 To compute odometry, the linear velocities that are obtained from the **/cmd_vel** topic need to be transformed from the robot frame to the global frame:
 $v_x = v_x_k \cdot \cos(theta_k) - v_y_k \cdot \sin(theta_k) </br>
@@ -119,7 +119,7 @@ This node is concerned to test the correctness of the computed speed published b
 
 $\small \begin{bmatrix} v_{l1}\\ v_{r1}\\v_{r2}\\v_{l2} \end{bmatrix}$ = $\small \dfrac{1}{r}$$\small \begin{bmatrix}-l-w&&1&&-1\\l+w&&1&&1\\l+w&&1&&-1\\-l-w&&1&&1\end{bmatrix}$ $\small \begin{bmatrix} \omega \\ v_{x} \\ v_{y} \end{bmatrix}$
 
-Notice that the result is given in $\scriptsize \dfrac{rad}{s}$ , so every single value is corrected with a conversion factor ($\scriptsize \bold{CONV\_FACTOR}$) to transform them into $\small rpm$. The results are then published into a custom message *WheelSpeed.msg*, on the topic **/wheels_rpm**.
+Notice that the result is given in $\scriptsize \dfrac{rad}{s}$ , so every single value is corrected with a conversion factor ($\scriptsize \bold{CONV\_FACTOR}= \small 9.549297$) to transform them into $\small rpm$. The results are then published into a custom message *WheelSpeed.msg*, on the topic **/wheels_rpm**.
 
 ## Services
 We implemented a service called `ResetOdometry` that resets the robot pose to any given pose. This service is described by the **ResetOdometry.srv** file: the Request of the service specify the new pose and the new time; the Response specify the old pose and the old time.
