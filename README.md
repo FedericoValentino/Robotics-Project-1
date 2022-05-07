@@ -1,4 +1,5 @@
 
+  
 # Robotics Project 1
 ## General Project Structure
 Our project is divided into 3 nodes, each of which, has a precise role.
@@ -38,9 +39,9 @@ The class handles the subscribing to the Wheel_states topic and the publishing o
 Everytime a message is received the wheelsCallback method is called, saving the current message either in msg1Data or in msg2Data; when at least 2 messages have been received the computeVelocities method is called and the actual computation can start.
 We first obtain the each of the wheel velocities from the encoders using the formula:
 
-$\dfrac{msg2Data.CurrentTicks - msg1Data.CurrentTicks}{msg2Data.CurrentTime-ms1Data.currentTime}\dfrac{1}{EncoderResolution} \dfrac{1}{GearRatio} 2\pi$
+$\scriptsize\dfrac{msg2Data.CurrentTicks - msg1Data.CurrentTicks}{msg2Data.CurrentTime-ms1Data.currentTime}\dfrac{1}{EncoderResolution} \dfrac{1}{GearRatio} 2\pi$
 
-After obtaining the wheel velocities in $\dfrac{rad}{s}$ we compute $V_x$, $V_y$ and $\omega_z$ as follows:
+After obtaining the wheel velocities in $\scriptsize\dfrac{rad}{s}$ we compute $V_x$, $V_y$ and $\omega_z$ as follows:
 
 $V_x  = (\omega_{fl} + \omega_{fr} + \omega_{rl} + \omega_{rr}) \cdot \frac{r}{4}$
 $V_y  = (-\omega_{fl} + \omega_{fr} + \omega_{rl} - \omega_{rr}) \cdot \frac{r}{4}$
@@ -48,7 +49,7 @@ $\omega_z = (-\omega_{fl} + \omega_{fr} - \omega_{rl} + \omega_{rr}) \cdot \frac
 
 All of that is then assembled into a TwistStamped message and published via the publishVelocities method.
 
-As you can see the class doesn't quite end there. For example the pubTest publisher is used to publish the computed wheel speeds in $RPM$ in order to confront them with the results obtained by the **Wheel_speed** node.
+As you can see the class doesn't quite end there. For example the pubTest publisher is used to publish the computed wheel speeds in $\small rpm$ in order to confront them with the results obtained by the **Wheel_speed** node.
 The totalMessage integer is just used to count up the number of messages received by the node.
 
 ### OdometryPublisher node
@@ -140,7 +141,7 @@ where *param* can be 0 or 1.
 We prefered to calibrate our r, l, w and N values manually rather than making our nodes to it automatically. For each parameter we have applied a different approach.
 
 ### Encoder Resolution(N)
-What we have done to get the perfect Encoder Resolution is run the Bag1.bag data through a Perceptron. We first started by getting the data out of the bag by using our first node, Velocity_comp(you can see the code lines we used to do it in the node source code, commented out). One file contained the raw wheel speeds in $\scriptsize \dfrac{rad}{s}$, the other one contained our wheel speeds, not yet multiplied by $\scriptsize \dfrac{1}{EncoderResolution}$. What we fed the neuron were our speeds and what we got out of it after some training were our raw wheel speeds. The Perceptron guessed after many inputs the best Encoder Resolution to use, which was 39,8475. The code follows:
+What we have done to get the perfect Encoder Resolution is run the Bag1.bag data through a Perceptron. We first started by getting the data out of the bag by using our first node, Velocity_comp(you can see the code lines we used to do it in the node source code, commented out). One file contained the raw wheel speeds in $\scriptsize \dfrac{rad}{s}$, the other one contained our wheel speeds, not yet multiplied by $\scriptsize \dfrac{1}{EncoderResolution}$. What we fed the neuron were our speeds and what we got out of it after some training were our raw wheel speeds. The Perceptron guessed after many inputs the best Encoder Resolution to use, which was 39,45799077400557. The code follows:
 
     #include <stdio.h>
     #include<iostream>
@@ -175,7 +176,7 @@ What we have done to get the perfect Encoder Resolution is run the Bag1.bag data
         error = actualOutput - output;
         if(abs(error) > 0.001)
         {
-          adjustment = error / input * learningFactor;
+          adjustment = error * input * learningFactor;
           weight += adjustment;
           bias += error * learningFactor;
         }
@@ -204,5 +205,7 @@ What we have done to get the perfect Encoder Resolution is run the Bag1.bag data
     }
 
 ### Wheel radius R
+We tried different methods for the calibration of this parameter. At first we thought using the previously used perceptron wasn't an option and so we got, after manually trying some values, the radius to be equal to 0.069, but after thinking about it more, we started trying to implement the perceptron once again. The main problem was the data to use it with. We decided to compare our computed pose against the /robot/pose topic. Problem was our OdometryPublisher node was publishing its messages at around 48 Hz, while the /robot/pose message from the bag was coming out at around 128hz, so our calculations were one third of what they needed to be. After thinking about it we decided to only take the data that came out at the same timestamp from both topics. We put the data inside our perceptron, only to find out that the noise from the /robot/pose topic was ruining everything. We were getting results that ranged from 0.03 up to 0.09. Once we looked more into it we saw that the perceptron was actually getting results around 0.069 but at the end diverging from that. We also tried to create a node, where it's objective was to add or subtract some value from the radius and then publish it on a /radius topic, but that didn't work either. At the end we decided to stick with R = 0.069 since the results we were getting in rviz with that were really good.
 
-### Length (l) and Width (w)
+### Length (L) and Width (w)
+After calibrating the radius we saw that the only value we were still having problems with was $\omega$ and since L and W did take a part in that calculation we decided to calibrate them manually and we got them down to be at around L = 0.2 and W = 0.169.
