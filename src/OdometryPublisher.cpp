@@ -31,7 +31,7 @@ void OdometryPublisher::velocityCallback(const geometry_msgs::TwistStamped::Cons
     v_y_k = msg->twist.linear.y;
     omega_k = msg->twist.angular.z;
     t_k = t_k_new;
-    t_k_new = msg->header.stamp;
+    t_k_new = ros::Time::now();
 
     switch (integrationMethod) {
         case IntegrationMethod::EULER :
@@ -51,15 +51,15 @@ bool OdometryPublisher::resetOdometryCallback(project1::ResetOdometry::Request &
     res.old_x = x_k;
     res.old_y = y_k;
     res.old_theta = theta_k;
-    res.old_time_seconds = t_k.toSec();
 
     x_k = req.new_x;
     y_k = req.new_y;
     theta_k = req.new_theta;
-    t_k_new = ros::Time(req.new_time_seconds);
+
+    t_k_new = ros::Time::now();
 
     isInitialized = true;
-    //ROS_INFO("Reset at pose (%f,%f,%f) and time %f sec", x_k, y_k, theta_k, req.new_time_seconds);
+    ROS_INFO("Reset at pose (%f,%f,%f)", x_k, y_k, theta_k);
 
     return true;
 }
@@ -113,7 +113,7 @@ void OdometryPublisher::publishOdometry(const std_msgs::Header header) {
 
     msg.header.frame_id = "odom";
     msg.header.seq = header.seq;
-    msg.header.stamp = header.stamp;
+    msg.header.stamp = t_k_new;
     msg.child_frame_id = "base_link";
 
     msg.pose.pose.position.x = x_k;
@@ -127,16 +127,13 @@ void OdometryPublisher::publishOdometry(const std_msgs::Header header) {
     msg.pose.pose.orientation.z = q.getZ();
     msg.pose.pose.orientation.w = q.getW();
 
-
-    ROS_INFO("Robot pose : (%f, %f, %f)", msg.pose.pose.position.x, msg.pose.pose.position.y, msg.pose.pose.orientation.z);
-
     pub.publish(msg);
 }
 
 void OdometryPublisher::broadcastTFOdometry(const std_msgs::Header header) {
 
     transformStamped.header.seq = header.seq;
-    transformStamped.header.stamp = header.stamp;
+    transformStamped.header.stamp = t_k_new;
     transformStamped.header.frame_id = "odom";
     transformStamped.child_frame_id = "base_link";
 

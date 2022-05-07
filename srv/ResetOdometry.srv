@@ -1,9 +1,7 @@
 float64 new_x
 float64 new_y
 float64 new_theta
-float64 new_time_seconds
 ---
 float64 old_x
 float64 old_y
 float64 old_theta
-float64 old_time_seconds

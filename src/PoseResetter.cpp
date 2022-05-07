@@ -28,8 +28,6 @@ void PoseResetter::initialPositionCallback(const geometry_msgs::PoseStamped::Con
         m.getRPY(roll, pitch, yaw);
         resetSrv.request.new_theta = yaw;
 
-        resetSrv.request.new_time_seconds = msg->header.stamp.toSec();
-
         initializationDone = client.call(srv);
     }
 }
