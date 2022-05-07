@@ -2,9 +2,9 @@
 #include "geometry_msgs/TwistStamped.h"
 #include "project1/WheelSpeed.h"
 
-#define R 0.064
-#define L 0.2
-#define W 0.169
+#define R 0.0688
+#define L 0.192
+#define W 0.161
 #define CONV_FACTOR 9.549297 //it converts from rad/s to rpm
 
 ros::Publisher pub;

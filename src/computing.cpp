@@ -4,11 +4,11 @@
 #include "VelocityPublisher.h"
 #include "project1/WheelSpeed.h"
 
-#define WHEELRADIUS 0.064
-#define ENCODER_RES 39.8475
-#define RATIO 5.0
-#define L 0.2
-#define W 0.169
+#define WHEELRADIUS 0.0688
+#define ENCODER_RES 39.45799077400557
+#define RATIO 4.9
+#define L 0.192
+#define W 0.161
 #define PI 3.14
 #define CONV_FACTOR 9.549297
 
