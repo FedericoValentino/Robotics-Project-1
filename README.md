@@ -98,21 +98,17 @@ private:
 ```
 This class subscribes to the **/cmd_vel** topic and uses its content to compute the odometry, that will be published in the **/odom** topic. Method `velocityCallback` is called everytime a message from **/cmd_vel** is subscribed; this method updates the current velocities of the robot in the robot frame and the current time. Depending on the value of the *integrationMethod* attribute, method `velocityCallback` calls `eulerOdometry` (if the *integrationMethod* is **EULER**) or `rungeKuttaOdometry` (if the *integrationMethod* is **RUNGE_KUTTA**); these two methods update the robot's odometry.
 
-To compute odometry, linear velocities that are obtained from the **/cmd_vel** topic need to be transformed from the robot frame to the global frame:
-$v_x = v_x_k \cdot \cos(theta_k) - v_y_k \cdot \sin(theta_k) </br>
-$v_y = v_x_k \cdot \sin(theta_k) + v_y_k \cdot \cos(theta_k) </br>
+To compute odometry, linear velocities that are obtained from the **/cmd_vel** topic need to be transformed from the robot frame to the global frame:</br>
+![velocities](https://user-images.githubusercontent.com/58942793/167296040-053292db-4779-4c23-9af8-c53ae16613eb.png)</br>
 where *v_x* and *v_y* are in the global frame and *v_x_k* and *v_y_k* are in the robot frame.
 
 Method `eulerOdometry` uses Euler integration to compute odometry:</br>
-$x_k = x_k + v_x \cdot Ts </br>
-$y_k = y_k + v_y \cdot Ts </br>
-$theta_k = theta_k + omega \cdot Ts </br>
-where Ts is the interval between the last received message (*t_k*) and the newly received message(*t_k_new*).
+![euler](https://user-images.githubusercontent.com/58942793/167296078-5b07f813-be12-4b65-a5ec-9fe6a9ccc041.png)</br>
+where *Ts* is the interval between the last received message (*t_k*) and the newly received message(*t_k_new*).
 
 Method `rungeKuttaOdometry` uses Runge-Kutta integration to compute odometry: </br>
-$x_k = x_k + v \cdot Ts \cdot \cos(theta_k + (omega * Ts / 2) </br>
-$y_k = y_k + v \cdot Ts \cdot \sin(theta_k + (omega * Ts / 2) </br>
-$theta_k = theta_k + omega \cdot Ts
+![runge-kutta](https://user-images.githubusercontent.com/58942793/167296097-3644fd15-287e-45f6-97c6-412e97fe1765.png)</br>
+where *v* is the module of the velocity and *alpha* is the velocity orientation, whith respect to the robot frame (so *omega + alpha* is the orientation of the velocity in the global frame).
 
 After computing odometry, `publishOdometry` and `broadcastTFOdometry` methods are called: the first one publishes the robot's odometry in the **/odom** topic; the second one broadcasts TF from frame **odom** to frame **base_link**.
 
@@ -124,6 +120,9 @@ This node is concerned to test the correctness of the computed speed published b
 $\small \begin{bmatrix} v_{l1}\\ v_{r1}\\v_{r2}\\v_{l2} \end{bmatrix}$ = $\small \dfrac{1}{r}$$\small \begin{bmatrix}-l-w&&1&&-1\\l+w&&1&&1\\l+w&&1&&-1\\-l-w&&1&&1\end{bmatrix}$ $\small \begin{bmatrix} \omega \\ v_{x} \\ v_{y} \end{bmatrix}$
 
 Notice that the result is given in $\scriptsize \dfrac{rad}{s}$ , so every single value is corrected with a conversion factor ($\scriptsize \bold{CONV\_FACTOR}= \small 9.549297$) to transform them into $\small rpm$. The results are then published into a custom message *WheelSpeed.msg*, on the topic **/wheels_rpm**.
+
+## Structure of the TF tree
+![tf_tree](https://user-images.githubusercontent.com/58942793/167296121-4e0e301c-90a8-4f86-b293-9e1b4a99363c.png)
 
 ## Services
 We implemented a service called `ResetOdometry` that resets the robot pose to any given pose. This service is described by the **ResetOdometry.srv** file: the Request of the service specifies the new pose; the Response specifies the old pose.
