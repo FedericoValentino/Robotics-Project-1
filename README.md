@@ -128,6 +128,8 @@ To call the `ResetOdometry` service: </br>
 `rosservice call /reset param1 param2 param3`</br>
 where *param1* is the new *x*, *param2* is the new *y* and *param3* is the new *theta*.
 
+We have also added a small node called `PoseResetter` that read the first data from the ground truth pose and reset the OdometryPublisher pose at that pose. This is to make sure that the robot starts from the correct position.
+
 ## Dynamic Reconfigure
 We also used dynamic reconfigure to reconfigure the integration method for computing the robot odometry. To call the dynamic reconfigure:</br>
 `rosrun rqt_reconfigure rqt_reconfigure`</br>
