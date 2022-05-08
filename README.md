@@ -10,6 +10,9 @@ Our project is divided into 3 nodes, each of which, has a precise role.
 
 We also have included a reset service, for resetting the odometry at any given pose and a dynamic reconfigure, to change the integration method between Euler and Runge-Kutta.
 
+To start all nodes (except the bag) insert `roslaunch project1 start.launch`; to play different bags multiple times you will have to restart all nodes with that command (this because the initial position of the robot needs to be resetted). In the launch file we have also included a static tranformation that align the *odom* frame and the *world* frame.
+
+
 ### Velocity_Comp Node
 
 This first node is built around a custom C++ class called VelocityPublisher.
