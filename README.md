@@ -38,17 +38,23 @@ This first node is built around a custom C++ class called VelocityPublisher.
       int totalMessage;
     };
 
+
 The class handles the subscribing to the Wheel_states topic and the publishing of the cmd_vel topic.
 Everytime a message is received the wheelsCallback method is called, saving the current message either in msg1Data or in msg2Data; when at least 2 messages have been received the computeVelocities method is called and the actual computation can start.
 We first obtain each of the wheel velocities from the encoders using the formula:
 
-$\scriptsize\dfrac{msg2Data.CurrentTicks - msg1Data.CurrentTicks}{msg2Data.CurrentTime-ms1Data.currentTime}\dfrac{1}{EncoderResolution} \dfrac{1}{GearRatio} 2\pi$
+![equation](https://user-images.githubusercontent.com/100689535/167306555-c5dfcc39-bc82-4703-8151-c5a1f54ca64e.png)
 
-After obtaining the wheel velocities in $\scriptsize\dfrac{rad}{s}$ we compute $V_x$, $V_y$ and $\omega_z$ as follows:
+After obtaining the wheel velocities in ![rads](https://user-images.githubusercontent.com/100689535/167306953-7b720742-ba9f-4ef4-a68e-edb4fb28aac4.png) we compute ![vx](https://user-images.githubusercontent.com/100689535/167306957-2126cc47-9440-4dc4-a8ed-6d6d7a68b6e1.png), ![vy](https://user-images.githubusercontent.com/100689535/167306960-fb43d11e-7f63-4b86-bf0c-66ed2485a837.png)
+ and ![omegaz](https://user-images.githubusercontent.com/100689535/167306963-429f64e4-9970-427e-802d-34eae0bcf9dd.png)
+ as follows:
 
-$V_x  = (\omega_{fl} + \omega_{fr} + \omega_{rl} + \omega_{rr}) \cdot \frac{r}{4}$
-$V_y  = (-\omega_{fl} + \omega_{fr} + \omega_{rl} - \omega_{rr}) \cdot \frac{r}{4}$
-$\omega_z = (-\omega_{fl} + \omega_{fr} - \omega_{rl} + \omega_{rr}) \cdot \frac{r}{4(l_x + l_y)}$
+![equation(1)](https://user-images.githubusercontent.com/100689535/167306759-c679860e-4030-482c-9a8d-ba72a01fef2c.png)
+
+![equation(2)](https://user-images.githubusercontent.com/100689535/167306834-865a17cc-0e8a-4442-ae7e-24f62ad643ab.png)
+
+![equation(3)](https://user-images.githubusercontent.com/100689535/167306773-8ce7e28f-b786-49bc-81dc-f11e1d3f6c5a.png)
+
 
 All of that is then assembled into a TwistStamped message and published via the publishVelocities method.
 
@@ -117,9 +123,10 @@ Method `resetOdometryCallback` is the callback function of the ResetOdometry ser
 ### WheelSpeed node
 This node is concerned to test the correctness of the computed speed published by the **computing** node. It subscribes to the topic **/cmd_vel**, then it calls the *publishSpeed* callback function which computes, starting from the robot's linear and angular speeds, each of the single wheel speeds, by using the following formula:
 
-$\small \begin{bmatrix} v_{l1}\\ v_{r1}\\v_{r2}\\v_{l2} \end{bmatrix}$ = $\small \dfrac{1}{r}$$\small \begin{bmatrix}-l-w&&1&&-1\\l+w&&1&&1\\l+w&&1&&-1\\-l-w&&1&&1\end{bmatrix}$ $\small \begin{bmatrix} \omega \\ v_{x} \\ v_{y} \end{bmatrix}$
+![Matrix](https://user-images.githubusercontent.com/100689535/167307259-9bf00148-9a42-4156-854a-67d94c2331f3.png)
 
-Notice that the result is given in $\scriptsize \dfrac{rad}{s}$ , so every single value is corrected with a conversion factor ($\scriptsize \bold{CONV\_FACTOR}= \small 9.549297$) to transform them into $\small rpm$. The results are then published into a custom message *WheelSpeed.msg*, on the topic **/wheels_rpm**.
+
+Notice that the result is given in  ![rads](https://user-images.githubusercontent.com/100689535/167306953-7b720742-ba9f-4ef4-a68e-edb4fb28aac4.png), so every single value is corrected with a conversion factor (CONVFACTOR = 9.549297) to transform them into RPM. The results are then published into a custom message *WheelSpeed.msg*, on the topic **/wheels_rpm**.
 
 ## Structure of the TF tree
 ![tf_tree](https://user-images.githubusercontent.com/58942793/167296121-4e0e301c-90a8-4f86-b293-9e1b4a99363c.png)
