@@ -123,7 +123,7 @@ $\small \begin{bmatrix} v_{l1}\\ v_{r1}\\v_{r2}\\v_{l2} \end{bmatrix}$ = $\small
 Notice that the result is given in $\scriptsize \dfrac{rad}{s}$ , so every single value is corrected with a conversion factor ($\scriptsize \bold{CONV\_FACTOR}= \small 9.549297$) to transform them into $\small rpm$. The results are then published into a custom message *WheelSpeed.msg*, on the topic **/wheels_rpm**.
 
 ## Services
-We implemented a service called `ResetOdometry` that resets the robot pose to any given pose. This service is described by the **ResetOdometry.srv** file: the Request of the service specifies the new pose and the new time; the Response specifies the old pose and the old time.
+We implemented a service called `ResetOdometry` that resets the robot pose to any given pose. This service is described by the **ResetOdometry.srv** file: the Request of the service specifies the new pose; the Response specifies the old pose.
 To call the `ResetOdometry` service: </br>
 `rosservice call /reset param1 param2 param3`</br>
 where *param1* is the new *x*, *param2* is the new *y* and *param3* is the new *theta*.
