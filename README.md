@@ -1,4 +1,6 @@
-
+10679810 - Federico Valentino
+10660072 - Carlo Sgaravatti
+10723028 - Francesco Scroccarello
   
 # Robotics Project 1
 ## General Project Structure
